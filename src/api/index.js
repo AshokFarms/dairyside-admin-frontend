@@ -1,0 +1,88 @@
+import apiClient from './apiClient'
+
+export const dashboardApi = {
+  getStats: () => apiClient.get('/admin/dashboard/stats'),
+  getRevenueChart: (params) => apiClient.get('/admin/dashboard/revenue-chart', { params }),
+  getRecentOrders: () => apiClient.get('/admin/dashboard/recent-orders'),
+  getLowStock: () => apiClient.get('/admin/dashboard/low-stock'),
+}
+
+export const ordersApi = {
+  getAll: (params) => apiClient.get('/admin/orders', { params }),
+  getById: (id) => apiClient.get(`/admin/orders/${id}`),
+  updateStatus: (id, data) => apiClient.patch(`/admin/orders/${id}/status`, data),
+  updateNotes: (id, data) => apiClient.patch(`/admin/orders/${id}/notes`, data),
+  bulkUpdateStatus: (data) => apiClient.post('/admin/orders/bulk-status', data),
+}
+
+export const productsApi = {
+  getAll: (params) => apiClient.get('/admin/products', { params }),
+  getById: (id) => apiClient.get(`/admin/products/${id}`),
+  create: (data) => apiClient.post('/admin/products', data),
+  update: (id, data) => apiClient.put(`/admin/products/${id}`, data),
+  delete: (id) => apiClient.delete(`/admin/products/${id}`),
+  addVariant: (productId, data) => apiClient.post(`/admin/products/${productId}/variants`, data),
+  updateVariant: (id, data) => apiClient.put(`/admin/variants/${id}`, data),
+  updateStock: (id, data) => apiClient.patch(`/admin/variants/${id}/stock`, data),
+}
+
+export const categoriesApi = {
+  getAll: (params) => apiClient.get('/admin/categories', { params }),
+  create: (data) => apiClient.post('/admin/categories', data),
+  update: (id, data) => apiClient.put(`/admin/categories/${id}`, data),
+  delete: (id) => apiClient.delete(`/admin/categories/${id}`),
+}
+
+export const customersApi = {
+  getAll: (params) => apiClient.get('/admin/customers', { params }),
+  getById: (id) => apiClient.get(`/admin/customers/${id}`),
+  getOrders: (id, params) => apiClient.get(`/admin/customers/${id}/orders`, { params }),
+  getSubscriptions: (id) => apiClient.get(`/admin/customers/${id}/subscriptions`),
+  getWallet: (id, params) => apiClient.get(`/admin/customers/${id}/wallet`, { params }),
+  adjustWallet: (id, data) => apiClient.post(`/admin/customers/${id}/wallet`, data),
+}
+
+export const subscriptionsApi = {
+  getAll: (params) => apiClient.get('/admin/subscriptions', { params }),
+  getById: (id) => apiClient.get(`/admin/subscriptions/${id}`),
+  updateStatus: (id, data) => apiClient.patch(`/admin/subscriptions/${id}/status`, data),
+  getTrialPacks: (params) => apiClient.get('/admin/trial-packs', { params }),
+}
+
+export const deliveriesApi = {
+  getToday: (params) => apiClient.get('/admin/deliveries/today', { params }),
+  complete: (orderId) => apiClient.patch(`/admin/deliveries/${orderId}/complete`),
+  bulkComplete: (data) => apiClient.post('/admin/deliveries/bulk-complete', data),
+}
+
+export const couponsApi = {
+  getAll: (params) => apiClient.get('/admin/coupons', { params }),
+  getById: (id) => apiClient.get(`/admin/coupons/${id}`),
+  create: (data) => apiClient.post('/admin/coupons', data),
+  update: (id, data) => apiClient.put(`/admin/coupons/${id}`, data),
+  delete: (id) => apiClient.delete(`/admin/coupons/${id}`),
+}
+
+export const contentApi = {
+  getBanners: (params) => apiClient.get('/admin/banners', { params }),
+  createBanner: (data) => apiClient.post('/admin/banners', data),
+  updateBanner: (id, data) => apiClient.put(`/admin/banners/${id}`, data),
+  deleteBanner: (id) => apiClient.delete(`/admin/banners/${id}`),
+  sendNotification: (data) => apiClient.post('/admin/notifications', data),
+  getSettings: () => apiClient.get('/admin/settings'),
+  updateSettings: (data) => apiClient.put('/admin/settings', data),
+}
+
+export const serviceAreaApi = {
+  getPincodes: (params) => apiClient.get('/admin/pincodes', { params }),
+  createPincode: (data) => apiClient.post('/admin/pincodes', data),
+  updatePincode: (id, data) => apiClient.put(`/admin/pincodes/${id}`, data),
+  deletePincode: (id) => apiClient.delete(`/admin/pincodes/${id}`),
+  getDeliverySlots: () => apiClient.get('/admin/delivery-slots'),
+  updateDeliverySlot: (id, data) => apiClient.put(`/admin/delivery-slots/${id}`, data),
+}
+
+export const messagesApi = {
+  getAll: (params) => apiClient.get('/admin/contact-messages', { params }),
+  respond: (id, data) => apiClient.patch(`/admin/contact-messages/${id}`, data),
+}
