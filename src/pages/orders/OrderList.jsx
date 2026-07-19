@@ -1,42 +1,39 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PageHeader from '../../components/common/PageHeader'
 import DataTable from '../../components/common/DataTable'
 import StatusBadge from '../../components/common/StatusBadge'
 import Button from '../../components/common/Button'
-import { formatCurrency, formatDate, timeAgo } from '../../utils/formatters'
+import { ordersApi } from '../../api'
+import { formatCurrency, timeAgo } from '../../utils/formatters'
 import { ORDER_STATUS_LABELS } from '../../utils/constants'
 
-const mockOrders = Array.from({ length: 25 }, (_, i) => {
-  const statuses = ['pending', 'confirmed', 'processing', 'out_for_delivery', 'delivered', 'cancelled']
-  const types = ['one_time', 'subscription_delivery', 'trial']
-  const names = ['Rajesh Kumar', 'Priya Sharma', 'Amit Singh', 'Sunita Devi', 'Vikram Patel', 'Neha Gupta', 'Rohit Agarwal', 'Kavita Rao', 'Deepak Joshi', 'Anita Verma']
-  return {
-    id: i + 1,
-    order_number: `SWD2604${String(11 - Math.floor(i / 10)).padStart(2, '0')}-${String(50 - i).padStart(4, '0')}`,
-    customer_name: names[i % names.length],
-    customer_phone: `+91 98${Math.floor(10000000 + Math.random() * 90000000)}`,
-    items_count: Math.floor(Math.random() * 5) + 1,
-    total_amount: Math.floor(Math.random() * 800) + 40,
-    status: statuses[i % statuses.length],
-    order_type: types[i % types.length],
-    payment_status: i % 4 === 0 ? 'pending' : 'paid',
-    delivery_shift: i % 2 === 0 ? 'morning' : 'evening',
-    delivery_date: new Date(Date.now() + (i % 3 - 1) * 86400000).toISOString().split('T')[0],
-    created_at: new Date(Date.now() - i * 3600000).toISOString(),
-  }
-})
+const PAGE_SIZE = 25
 
 export default function OrderList() {
   const navigate = useNavigate()
   const [statusFilter, setStatusFilter] = useState('all')
-  const [typeFilter, setTypeFilter] = useState('all')
+  const [orders, setOrders] = useState([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(true)
 
-  const filteredOrders = mockOrders.filter(o => {
-    if (statusFilter !== 'all' && o.status !== statusFilter) return false
-    if (typeFilter !== 'all' && o.order_type !== typeFilter) return false
-    return true
-  })
+  useEffect(() => {
+    let alive = true
+    setLoading(true)
+    const params = { page, limit: PAGE_SIZE }
+    if (statusFilter !== 'all') params.status = statusFilter
+    ordersApi
+      .getAll(params)
+      .then((res) => {
+        if (!alive) return
+        setOrders(res.data || [])
+        setTotal(res.pagination?.total ?? 0)
+      })
+      .catch(() => alive && setOrders([]))
+      .finally(() => alive && setLoading(false))
+    return () => { alive = false }
+  }, [page, statusFilter])
 
   const columns = [
     {
@@ -114,7 +111,7 @@ export default function OrderList() {
 
   return (
     <div>
-      <PageHeader title="Orders" subtitle={`${mockOrders.length} total orders`}>
+      <PageHeader title="Orders" subtitle={`${total} total orders`}>
         <Button variant="secondary" size="sm" icon={
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         }>
@@ -131,7 +128,7 @@ export default function OrderList() {
         {statusTabs.map(tab => (
           <button
             key={tab}
-            onClick={() => setStatusFilter(tab)}
+            onClick={() => { setStatusFilter(tab); setPage(1) }}
             style={{
               padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: 'none',
               fontSize: '0.75rem', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer',
@@ -148,9 +145,11 @@ export default function OrderList() {
 
       <DataTable
         columns={columns}
-        data={filteredOrders}
+        data={orders}
+        loading={loading}
         onRowClick={(row) => navigate(`/orders/${row.id}`)}
-        pagination={{ total: filteredOrders.length, limit: 25, offset: 0 }}
+        pagination={{ total, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }}
+        onPageChange={(newOffset) => setPage(Math.floor(newOffset / PAGE_SIZE) + 1)}
         emptyTitle="No orders found"
         emptyDescription="Try changing the status filter"
       />

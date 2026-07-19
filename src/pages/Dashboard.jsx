@@ -1,59 +1,20 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import PageHeader from '../components/common/PageHeader'
 import StatsCard from '../components/common/StatsCard'
 import StatusBadge from '../components/common/StatusBadge'
-import { formatCurrency, formatDate, timeAgo, formatNumber } from '../utils/formatters'
+import LoadingSpinner from '../components/common/LoadingSpinner'
+import { dashboardApi } from '../api'
+import { formatCurrency, timeAgo, formatNumber } from '../utils/formatters'
 
-// ── Mock Data (will be replaced by API calls) ──
-const mockStats = {
-  todayRevenue: 24580,
-  weekRevenue: 156420,
-  monthRevenue: 682500,
-  pendingOrders: 23,
-  processedOrders: 156,
-  deliveredToday: 89,
-  cancelledOrders: 4,
-  activeSubscriptions: 342,
-  pausedSubscriptions: 28,
-  newSubscriptions: 12,
-  trialConversions: 67,
-  morningDeliveries: 64,
-  eveningDeliveries: 38,
-  deliveryCompletion: 87,
-  lowStockProducts: 5,
-  totalCustomers: 1280,
-  newCustomersToday: 8,
+const EMPTY_STATS = {
+  todayRevenue: 0, weekRevenue: 0, monthRevenue: 0,
+  pendingOrders: 0, processedOrders: 0, deliveredToday: 0, cancelledOrders: 0,
+  activeSubscriptions: 0, pausedSubscriptions: 0, newSubscriptions: 0,
+  trialConversions: 0, morningDeliveries: 0, eveningDeliveries: 0,
+  deliveryCompletion: 0, lowStockProducts: 0, totalCustomers: 0, newCustomersToday: 0,
 }
-
-const mockRevenueChart = [
-  { date: 'Mon', revenue: 32400, orders: 45 },
-  { date: 'Tue', revenue: 28600, orders: 38 },
-  { date: 'Wed', revenue: 35200, orders: 52 },
-  { date: 'Thu', revenue: 41800, orders: 58 },
-  { date: 'Fri', revenue: 38900, orders: 49 },
-  { date: 'Sat', revenue: 45600, orders: 62 },
-  { date: 'Sun', revenue: 24580, orders: 34 },
-]
-
-const mockRecentOrders = [
-  { id: 1, order_number: 'SWD260411-0042', customer: 'Rajesh Kumar', items: 3, total: 285, status: 'pending', type: 'one_time', created_at: new Date(Date.now() - 1800000).toISOString() },
-  { id: 2, order_number: 'SWD260411-0041', customer: 'Priya Sharma', items: 1, total: 56, status: 'out_for_delivery', type: 'subscription_delivery', created_at: new Date(Date.now() - 3600000).toISOString() },
-  { id: 3, order_number: 'SWD260411-0040', customer: 'Amit Singh', items: 2, total: 142, status: 'delivered', type: 'one_time', created_at: new Date(Date.now() - 7200000).toISOString() },
-  { id: 4, order_number: 'SWD260411-0039', customer: 'Sunita Devi', items: 1, total: 48, status: 'processing', type: 'subscription_delivery', created_at: new Date(Date.now() - 10800000).toISOString() },
-  { id: 5, order_number: 'SWD260411-0038', customer: 'Vikram Patel', items: 4, total: 420, status: 'confirmed', type: 'one_time', created_at: new Date(Date.now() - 14400000).toISOString() },
-  { id: 6, order_number: 'SWD260411-0037', customer: 'Neha Gupta', items: 1, total: 34, status: 'delivered', type: 'trial', created_at: new Date(Date.now() - 18000000).toISOString() },
-  { id: 7, order_number: 'SWD260411-0036', customer: 'Rohit Agarwal', items: 2, total: 186, status: 'cancelled', type: 'one_time', created_at: new Date(Date.now() - 21600000).toISOString() },
-]
-
-const mockLowStock = [
-  { id: 1, name: 'A2 Cow Milk', variant: '500ml', stock: 12, threshold: 20 },
-  { id: 2, name: 'Buffalo Milk', variant: '1L', stock: 8, threshold: 25 },
-  { id: 3, name: 'Paneer (Fresh)', variant: '200g', stock: 5, threshold: 15 },
-  { id: 4, name: 'Dahi (Curd)', variant: '400g', stock: 3, threshold: 20 },
-  { id: 5, name: 'Ghee (Desi)', variant: '500ml', stock: 6, threshold: 10 },
-]
 
 // ── Custom Tooltip ──
 const ChartTooltip = ({ active, payload, label }) => {
@@ -78,7 +39,34 @@ const ChartTooltip = ({ active, payload, label }) => {
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const stats = mockStats
+  const [stats, setStats] = useState(EMPTY_STATS)
+  const [revenueChart, setRevenueChart] = useState([])
+  const [recentOrders, setRecentOrders] = useState([])
+  const [lowStock, setLowStock] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let alive = true
+    Promise.all([
+      dashboardApi.getStats(),
+      dashboardApi.getRevenueChart({ days: 7 }),
+      dashboardApi.getRecentOrders(),
+      dashboardApi.getLowStock(),
+    ])
+      .then(([statsRes, chartRes, ordersRes, stockRes]) => {
+        if (!alive) return
+        setStats(statsRes.data || EMPTY_STATS)
+        setRevenueChart(chartRes.data || [])
+        setRecentOrders(ordersRes.data || [])
+        setLowStock(stockRes.data || [])
+      })
+      .catch((err) => alive && setError(err.message || 'Failed to load dashboard'))
+      .finally(() => alive && setLoading(false))
+    return () => { alive = false }
+  }, [])
+
+  if (loading) return <LoadingSpinner text="Loading dashboard..." />
 
   return (
     <div>
@@ -86,6 +74,16 @@ export default function Dashboard() {
         title="Dashboard"
         subtitle={`Welcome back! Here's what's happening today · ${new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`}
       />
+
+      {error && (
+        <div style={{
+          background: 'var(--color-danger-light)', color: 'var(--color-danger)',
+          border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: 'var(--radius-md)',
+          padding: '12px 16px', marginBottom: '16px', fontSize: '0.8125rem', fontWeight: 500,
+        }} role="alert">
+          {error} — is the admin API running on port 5001?
+        </div>
+      )}
 
       {/* ── KPI Cards ── */}
       <div style={{
@@ -97,26 +95,20 @@ export default function Dashboard() {
         <StatsCard
           title="Today's Revenue"
           value={formatCurrency(stats.todayRevenue)}
-          change={12.5}
-          changeType="increase"
-          subtitle="vs yesterday"
+          subtitle={`${formatCurrency(stats.monthRevenue)} this month`}
           color="var(--color-success)"
           icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>}
         />
         <StatsCard
           title="Pending Orders"
           value={stats.pendingOrders}
-          change={8.3}
-          changeType="decrease"
-          subtitle="vs yesterday"
+          subtitle={`${stats.processedOrders} processed`}
           color="var(--color-warning)"
           icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>}
         />
         <StatsCard
           title="Active Subscriptions"
           value={formatNumber(stats.activeSubscriptions)}
-          change={3.2}
-          changeType="increase"
           subtitle={`+${stats.newSubscriptions} new today`}
           color="var(--color-primary)"
           icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9"/></svg>}
@@ -124,9 +116,7 @@ export default function Dashboard() {
         <StatsCard
           title="Delivered Today"
           value={stats.deliveredToday}
-          change={stats.deliveryCompletion}
-          changeType="increase"
-          subtitle="completion rate"
+          subtitle={`${stats.deliveryCompletion}% completion rate`}
           color="#10b981"
           icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>}
         />
@@ -151,7 +141,7 @@ export default function Dashboard() {
             </div>
           </div>
           <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={mockRevenueChart}>
+            <AreaChart data={revenueChart}>
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.3} />
@@ -280,7 +270,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {mockRecentOrders.map((order) => (
+                {recentOrders.map((order) => (
                   <tr key={order.id} onClick={() => navigate(`/orders/${order.id}`)} style={{ cursor: 'pointer' }}>
                     <td style={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--color-primary-light)' }}>{order.order_number}</td>
                     <td style={{ fontWeight: 500 }}>{order.customer}</td>
@@ -322,11 +312,11 @@ export default function Dashboard() {
               marginLeft: 'auto', fontSize: '0.7rem', fontWeight: 600, padding: '2px 8px',
               borderRadius: '12px', background: 'var(--color-danger-light)', color: 'var(--color-danger)',
             }}>
-              {mockLowStock.length} items
+              {lowStock.length} items
             </span>
           </div>
           <div style={{ padding: '8px 0' }}>
-            {mockLowStock.map((item) => (
+            {lowStock.map((item) => (
               <div
                 key={item.id}
                 style={{

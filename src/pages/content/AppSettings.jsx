@@ -1,32 +1,64 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import PageHeader from '../../components/common/PageHeader'
 import Button from '../../components/common/Button'
-
-const mockSettings = [
-  { key: 'free_delivery_threshold', value: '200', description: 'Minimum order amount for free delivery (₹)', type: 'number' },
-  { key: 'delivery_fee', value: '20', description: 'Default delivery fee (₹)', type: 'number' },
-  { key: 'gst_percentage', value: '5', description: 'GST percentage applied to orders', type: 'number' },
-  { key: 'max_wallet_balance', value: '5000', description: 'Maximum wallet balance a user can hold (₹)', type: 'number' },
-  { key: 'referral_bonus', value: '50', description: 'Referral bonus amount (₹)', type: 'number' },
-  { key: 'trial_refund_days', value: '7', description: 'Days within which trial refunds are processed', type: 'number' },
-  { key: 'support_email', value: 'support@dairyside.in', description: 'Customer support email', type: 'text' },
-  { key: 'support_phone', value: '+91 9876543210', description: 'Customer support phone', type: 'text' },
-  { key: 'order_prefix', value: 'SWD', description: 'Order number prefix', type: 'text' },
-  { key: 'maintenance_mode', value: 'false', description: 'Enable maintenance mode (disables ordering)', type: 'boolean' },
-]
+import LoadingSpinner from '../../components/common/LoadingSpinner'
+import { contentApi } from '../../api'
 
 export default function AppSettings() {
-  const [settings, setSettings] = useState(mockSettings)
+  const [settings, setSettings] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState(null) // { type: 'success' | 'error', text }
+
+  useEffect(() => {
+    let alive = true
+    contentApi
+      .getSettings()
+      .then((res) => alive && setSettings(res.data || []))
+      .catch((err) => alive && setMessage({ type: 'error', text: err.message || 'Failed to load settings' }))
+      .finally(() => alive && setLoading(false))
+    return () => { alive = false }
+  }, [])
 
   const updateSetting = (key, newValue) => {
     setSettings(prev => prev.map(s => s.key === key ? { ...s, value: newValue } : s))
   }
 
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+      setMessage(null)
+      const payload = Object.fromEntries(settings.map(s => [s.key, s.value]))
+      const res = await contentApi.updateSettings(payload)
+      setSettings(res.data || settings)
+      setMessage({ type: 'success', text: 'Settings saved' })
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message || 'Failed to save settings' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) return <LoadingSpinner text="Loading settings..." />
+
   return (
     <div>
       <PageHeader title="App Settings" subtitle="Configure global application settings">
-        <Button variant="primary" size="md">Save Changes</Button>
+        <Button variant="primary" size="md" disabled={saving} onClick={handleSave}>
+          {saving ? 'Saving…' : 'Save Changes'}
+        </Button>
       </PageHeader>
+
+      {message && (
+        <div style={{
+          background: message.type === 'success' ? 'var(--color-success-light)' : 'var(--color-danger-light)',
+          color: message.type === 'success' ? 'var(--color-success)' : 'var(--color-danger)',
+          borderRadius: 'var(--radius-md)', padding: '12px 16px', marginBottom: '16px',
+          fontSize: '0.8125rem', fontWeight: 500,
+        }} role="alert">
+          {message.text}
+        </div>
+      )}
 
       <div style={{
         background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-default)',
