@@ -1,28 +1,63 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchCategories, createCategory, updateCategory, deleteCategory } from '../../store/slices/categorySlice'
 import PageHeader from '../../components/common/PageHeader'
 import DataTable from '../../components/common/DataTable'
 import Button from '../../components/common/Button'
 import Modal from '../../components/common/Modal'
-
-const mockCategories = [
-  { id: 1, name: 'Milk', slug: 'milk', product_count: 6, display_order: 1, is_active: true, image_url: '🥛' },
-  { id: 2, name: 'Dairy Products', slug: 'dairy-products', product_count: 8, display_order: 2, is_active: true, image_url: '🧀' },
-  { id: 3, name: 'Beverages', slug: 'beverages', product_count: 4, display_order: 3, is_active: true, image_url: '🥤' },
-  { id: 4, name: 'Farm Fresh', slug: 'farm-fresh', product_count: 3, display_order: 4, is_active: true, image_url: '🌿' },
-  { id: 5, name: 'Combo Packs', slug: 'combo-packs', product_count: 2, display_order: 5, is_active: false, image_url: '📦' },
-]
+import { toast } from 'react-toastify'
 
 export default function CategoryList() {
-  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { items: categories, status, error } = useSelector((state) => state.categories)
+  
   const [showModal, setShowModal] = useState(false)
   const [editingCategory, setEditingCategory] = useState(null)
-  const [form, setForm] = useState({ name: '', slug: '', description: '', display_order: 0, is_active: true })
+  const [form, setForm] = useState({ name: '', slug: '', description: '', display_order: 0, is_active: true, image_url: '' })
+
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchCategories())
+    }
+  }, [status, dispatch])
 
   const handleEdit = (cat) => {
     setEditingCategory(cat)
-    setForm({ name: cat.name, slug: cat.slug, description: cat.description || '', display_order: cat.display_order, is_active: cat.is_active })
+    setForm({ 
+      name: cat.name, 
+      slug: cat.slug || '', 
+      description: cat.description || '', 
+      display_order: cat.display_order || 0, 
+      is_active: cat.is_active,
+      image_url: cat.image_url || ''
+    })
     setShowModal(true)
+  }
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this category?")) {
+      try {
+        await dispatch(deleteCategory(id)).unwrap()
+        toast.success("Category deleted successfully")
+      } catch (err) {
+        toast.error(err || "Failed to delete category")
+      }
+    }
+  }
+
+  const handleSubmit = async () => {
+    try {
+      if (editingCategory) {
+        await dispatch(updateCategory({ id: editingCategory.id, categoryData: form })).unwrap()
+        toast.success("Category updated successfully")
+      } else {
+        await dispatch(createCategory(form)).unwrap()
+        toast.success("Category created successfully")
+      }
+      setShowModal(false)
+    } catch (err) {
+      toast.error(err || "Failed to save category")
+    }
   }
 
   const columns = [
@@ -34,7 +69,9 @@ export default function CategoryList() {
       key: 'name', header: 'Category',
       render: (val, row) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ fontSize: '1.5rem', width: 40, textAlign: 'center' }}>{row.image_url}</div>
+          <div style={{ fontSize: '1.5rem', width: 40, textAlign: 'center' }}>
+            {row.image_url || '📁'}
+          </div>
           <div>
             <div style={{ fontWeight: 600 }}>{val}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>/{row.slug}</div>
@@ -42,7 +79,7 @@ export default function CategoryList() {
         </div>
       ),
     },
-    { key: 'product_count', header: 'Products', align: 'center', render: (val) => <span style={{ fontWeight: 600, color: 'var(--color-primary-light)' }}>{val}</span> },
+    { key: 'product_count', header: 'Products', align: 'center', render: (val) => <span style={{ fontWeight: 600, color: 'var(--color-primary-light)' }}>{val || 0}</span> },
     {
       key: 'is_active', header: 'Status',
       render: (val) => (
@@ -56,7 +93,7 @@ export default function CategoryList() {
       render: (_, row) => (
         <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
           <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleEdit(row) }}>Edit</Button>
-          <Button variant="danger" size="sm" onClick={(e) => e.stopPropagation()}>Delete</Button>
+          <Button variant="danger" size="sm" onClick={(e) => { e.stopPropagation(); handleDelete(row.id) }}>Delete</Button>
         </div>
       ),
     },
@@ -64,14 +101,24 @@ export default function CategoryList() {
 
   return (
     <div>
-      <PageHeader title="Categories" subtitle={`${mockCategories.length} categories`}>
+      <PageHeader title="Categories" subtitle={`${categories.length} categories`}>
         <Button variant="primary" size="md" icon={
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        } onClick={() => { setEditingCategory(null); setForm({ name: '', slug: '', description: '', display_order: mockCategories.length + 1, is_active: true }); setShowModal(true) }}>
+        } onClick={() => { 
+          setEditingCategory(null); 
+          setForm({ name: '', slug: '', description: '', display_order: categories.length + 1, is_active: true, image_url: '' }); 
+          setShowModal(true) 
+        }}>
           Add Category
         </Button>
       </PageHeader>
-      <DataTable columns={columns} data={mockCategories} emptyTitle="No categories found" />
+
+      {status === 'loading' && <p>Loading categories...</p>}
+      {error && <p style={{ color: 'var(--color-danger)' }}>Error: {error}</p>}
+      
+      {status !== 'loading' && !error && (
+        <DataTable columns={columns} data={categories} emptyTitle="No categories found" />
+      )}
 
       {/* Category Modal */}
       <Modal
@@ -82,17 +129,17 @@ export default function CategoryList() {
         footer={
           <>
             <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
-            <Button variant="primary" onClick={() => setShowModal(false)}>
+            <Button variant="primary" onClick={handleSubmit}>
               {editingCategory ? 'Update' : 'Create'}
             </Button>
           </>
         }
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {['name', 'slug', 'description'].map(field => (
+          {['name', 'slug', 'image_url', 'description'].map(field => (
             <div key={field}>
               <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'capitalize' }}>
-                {field}
+                {field.replace('_', ' ')}
               </label>
               {field === 'description' ? (
                 <textarea value={form[field]} onChange={e => setForm({ ...form, [field]: e.target.value })} rows={3}
