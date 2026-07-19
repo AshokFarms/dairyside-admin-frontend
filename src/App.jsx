@@ -1,5 +1,15 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import AdminLayout from './components/layout/AdminLayout'
+import Login from './pages/auth/Login'
+import { isAuthed } from './auth/session'
+
+// Gate every admin route behind the static-credentials login. Unauthenticated
+// visits redirect to /login and bounce back to the page they wanted after.
+function RequireAuth({ children }) {
+  const location = useLocation()
+  if (!isAuthed()) return <Navigate to="/login" state={{ from: location }} replace />
+  return children
+}
 import Dashboard from './pages/Dashboard'
 import OrderList from './pages/orders/OrderList'
 import OrderDetail from './pages/orders/OrderDetail'
@@ -17,7 +27,8 @@ import ComingSoon from './pages/ComingSoon'
 export default function App() {
   return (
     <Routes>
-      <Route element={<AdminLayout />}>
+      <Route path="login" element={isAuthed() ? <Navigate to="/" replace /> : <Login />} />
+      <Route element={<RequireAuth><AdminLayout /></RequireAuth>}>
         {/* Dashboard */}
         <Route index element={<Dashboard />} />
 

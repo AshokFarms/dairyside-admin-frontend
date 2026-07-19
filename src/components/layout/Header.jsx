@@ -1,7 +1,14 @@
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { logout } from '../../auth/session'
 
 export default function Header({ collapsed }) {
   const location = useLocation()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
 
   // Build breadcrumb from path
   const pathParts = location.pathname.split('/').filter(Boolean)
@@ -148,6 +155,27 @@ export default function Header({ collapsed }) {
             <div style={{ fontSize: '0.6875rem', color: 'var(--text-tertiary)' }}>admin@dairyside.in</div>
           </div>
         </div>
+
+        {/* Logout */}
+        <button
+          type="button"
+          onClick={handleLogout}
+          title="Sign out"
+          style={{
+            display: 'flex', alignItems: 'center', gap: '7px',
+            background: 'transparent', border: '1px solid var(--border-default)',
+            borderRadius: 'var(--radius-sm)', padding: '7px 12px', cursor: 'pointer',
+            color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, fontFamily: 'inherit',
+            transition: 'all var(--transition-fast)',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-danger)'; e.currentTarget.style.color = 'var(--color-danger)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-secondary)' }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Sign out
+        </button>
       </div>
     </header>
   )
