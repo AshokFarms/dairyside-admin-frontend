@@ -3,6 +3,7 @@ import PageHeader from '../../components/common/PageHeader'
 import DataTable from '../../components/common/DataTable'
 import StatusBadge from '../../components/common/StatusBadge'
 import Button from '../../components/common/Button'
+import FormGrid from '../../components/ui/FormGrid'
 import { couponsApi } from '../../api'
 import { formatCurrency, formatDate } from '../../utils/formatters'
 
@@ -131,7 +132,7 @@ export default function CouponList() {
         }} className="animate-fadeIn">
           <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 14px' }}>New coupon</h3>
           {error && <div style={{ color: 'var(--color-danger)', fontSize: '0.8125rem', marginBottom: '10px' }}>{error}</div>}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '14px' }}>
+          <FormGrid min={180} className="mb-3.5">
             <input style={inputStyle} placeholder="Code (e.g. FRESH20) *" value={form.code} onChange={e => setField('code', e.target.value.toUpperCase())} />
             <input style={inputStyle} placeholder="Description" value={form.description} onChange={e => setField('description', e.target.value)} />
             <select style={inputStyle} value={form.discount_type} onChange={e => setField('discount_type', e.target.value)}>
@@ -143,7 +144,7 @@ export default function CouponList() {
             <input style={inputStyle} type="number" min="1" placeholder="Max discount ₹ (optional)" value={form.max_discount} onChange={e => setField('max_discount', e.target.value)} />
             <input style={inputStyle} type="number" min="1" placeholder="Usage limit (optional)" value={form.usage_limit} onChange={e => setField('usage_limit', e.target.value)} />
             <input style={inputStyle} type="date" value={form.valid_until} onChange={e => setField('valid_until', e.target.value)} />
-          </div>
+          </FormGrid>
           <Button variant="primary" size="md" disabled={busy || !canSave} onClick={handleCreate}>
             {busy ? 'Saving…' : 'Save Coupon'}
           </Button>

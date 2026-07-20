@@ -4,6 +4,7 @@ import StatusBadge from '../../components/common/StatusBadge'
 import Button from '../../components/common/Button'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import EmptyState from '../../components/common/EmptyState'
+import TableScroll from '../../components/ui/TableScroll'
 import { deliveriesApi } from '../../api'
 import { formatDate } from '../../utils/formatters'
 
@@ -73,7 +74,7 @@ export default function DeliveryManifest() {
       </PageHeader>
 
       {/* Summary Cards */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5" style={{ marginBottom: '20px' }}>
         {[
           { label: 'Total', value: summary.total, color: 'var(--text-primary)' },
           { label: 'Pending', value: summary.pending, color: 'var(--color-warning)' },
@@ -92,7 +93,7 @@ export default function DeliveryManifest() {
       </div>
 
       {/* Shift Tabs */}
-      <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', padding: '4px', border: '1px solid var(--border-default)', width: 'fit-content' }}>
+      <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', padding: '4px', border: '1px solid var(--border-default)', width: 'fit-content', maxWidth: '100%', overflowX: 'auto' }}>
         {['all', 'morning', 'evening'].map(tab => (
           <button key={tab} onClick={() => setShiftFilter(tab)}
             style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: 'none', fontSize: '0.75rem', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', background: shiftFilter === tab ? 'var(--color-primary)' : 'transparent', color: shiftFilter === tab ? 'white' : 'var(--text-secondary)', textTransform: 'capitalize' }}>
@@ -103,6 +104,7 @@ export default function DeliveryManifest() {
 
       {/* Delivery List */}
       <div style={{ background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-default)', overflow: 'hidden' }}>
+        <TableScroll minWidth={720}>
         <table className="data-table">
           <thead>
             <tr>
@@ -146,6 +148,7 @@ export default function DeliveryManifest() {
             ))}
           </tbody>
         </table>
+        </TableScroll>
         {filtered.length === 0 && (
           <EmptyState title="No deliveries" description="Nothing scheduled for this shift today" />
         )}

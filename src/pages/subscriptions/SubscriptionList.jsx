@@ -83,7 +83,7 @@ export default function SubscriptionList() {
   return (
     <div>
       <PageHeader title="Subscriptions" subtitle={`${total} total subscriptions`} />
-      <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', padding: '4px', border: '1px solid var(--border-default)', width: 'fit-content' }}>
+      <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', padding: '4px', border: '1px solid var(--border-default)', width: 'fit-content', maxWidth: '100%', overflowX: 'auto' }}>
         {['all', 'active', 'paused', 'cancelled'].map(tab => (
           <button key={tab} onClick={() => { setStatusFilter(tab); setPage(1) }}
             style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: 'none', fontSize: '0.75rem', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', background: statusFilter === tab ? 'var(--color-primary)' : 'transparent', color: statusFilter === tab ? 'white' : 'var(--text-secondary)', transition: 'all var(--transition-fast)', textTransform: 'capitalize' }}>

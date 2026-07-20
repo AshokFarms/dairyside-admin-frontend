@@ -26,6 +26,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', f
 
   return (
     <div
+      className="p-3 sm:p-6"
       style={{
         position: 'fixed',
         inset: 0,
@@ -33,7 +34,6 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', f
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '24px',
         background: visible ? 'rgba(0, 0, 0, 0.6)' : 'rgba(0, 0, 0, 0)',
         backdropFilter: visible ? 'blur(4px)' : 'none',
         transition: 'all 200ms ease',
@@ -84,7 +84,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', f
         </div>
 
         {/* Body */}
-        <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+        <div className="p-4 sm:p-6" style={{ flex: 1, overflowY: 'auto' }}>
           {children}
         </div>
 

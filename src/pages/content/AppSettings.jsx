@@ -65,17 +65,18 @@ export default function AppSettings() {
         overflow: 'hidden',
       }}>
         {settings.map((setting, i) => (
-          <div key={setting.key} style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px',
-            padding: '18px 24px', borderBottom: i < settings.length - 1 ? '1px solid var(--border-default)' : 'none',
-          }}>
+          <div
+            key={setting.key}
+            className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
+            style={{ padding: '16px 20px', borderBottom: i < settings.length - 1 ? '1px solid var(--border-default)' : 'none' }}
+          >
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)', marginBottom: '2px' }}>
                 {setting.key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{setting.description}</div>
             </div>
-            <div style={{ width: '240px', flexShrink: 0 }}>
+            <div className="w-full sm:w-60 sm:shrink-0">
               {setting.type === 'boolean' ? (
                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                   <div

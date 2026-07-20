@@ -5,6 +5,7 @@ import StatusBadge from '../../components/common/StatusBadge'
 import Button from '../../components/common/Button'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import EmptyState from '../../components/common/EmptyState'
+import TableScroll from '../../components/ui/TableScroll'
 import { ordersApi } from '../../api'
 import { formatCurrency, formatDate, formatDateTime } from '../../utils/formatters'
 import { ORDER_STATUS_FLOW, ORDER_STATUS_LABELS } from '../../utils/constants'
@@ -147,7 +148,7 @@ export default function OrderDetail() {
       </div>
 
       {/* Main Content Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '16px' }}>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]">
         {/* Left Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Order Items */}
@@ -160,6 +161,7 @@ export default function OrderDetail() {
                 Order Items ({order.items.length})
               </h3>
             </div>
+            <TableScroll minWidth={420}>
             <table className="data-table">
               <thead>
                 <tr>
@@ -183,6 +185,7 @@ export default function OrderDetail() {
                 ))}
               </tbody>
             </table>
+            </TableScroll>
             {/* Totals */}
             <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border-default)' }}>
               {[

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import PageHeader from '../../components/common/PageHeader'
 import Button from '../../components/common/Button'
 import DataTable from '../../components/common/DataTable'
+import FormGrid from '../../components/ui/FormGrid'
 import { serviceAreaApi } from '../../api'
 import { formatCurrency } from '../../utils/formatters'
 
@@ -119,14 +120,14 @@ export default function PincodeList() {
         }} className="animate-fadeIn">
           <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 14px' }}>New serviceable pincode</h3>
           {error && <div style={{ color: 'var(--color-danger)', fontSize: '0.8125rem', marginBottom: '10px' }}>{error}</div>}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '12px' }}>
+          <FormGrid min={160} className="mb-3">
             <input style={inputStyle} placeholder="Pincode (6 digits) *" value={form.pincode} maxLength={6} onChange={e => setField('pincode', e.target.value.replace(/\D/g, ''))} />
             <input style={inputStyle} placeholder="Area name" value={form.area_name} onChange={e => setField('area_name', e.target.value)} />
             <input style={inputStyle} placeholder="City" value={form.city} onChange={e => setField('city', e.target.value)} />
             <input style={inputStyle} placeholder="State" value={form.state} onChange={e => setField('state', e.target.value)} />
             <input style={inputStyle} type="number" min="0" placeholder="Delivery fee (₹)" value={form.delivery_fee} onChange={e => setField('delivery_fee', e.target.value)} />
             <input style={inputStyle} type="number" min="0" placeholder="Min order (₹)" value={form.min_order_amount} onChange={e => setField('min_order_amount', e.target.value)} />
-          </div>
+          </FormGrid>
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '14px', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
             <label style={{ display: 'flex', gap: '6px', alignItems: 'center', cursor: 'pointer' }}>
               <input type="checkbox" checked={form.morning} onChange={e => setField('morning', e.target.checked)} style={{ accentColor: 'var(--color-primary)' }} /> ☀ Morning slot

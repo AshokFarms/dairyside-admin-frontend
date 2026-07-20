@@ -66,7 +66,7 @@ const icons = {
   ),
 }
 
-export default function Sidebar({ collapsed, onToggle }) {
+export default function Sidebar({ isDesktop = true, collapsed, mobileOpen, onToggleCollapse, onCloseMobile }) {
   const location = useLocation()
   const [expandedItems, setExpandedItems] = useState({})
 
@@ -96,11 +96,15 @@ export default function Sidebar({ collapsed, onToggle }) {
         position: 'fixed',
         top: 0,
         left: 0,
-        zIndex: 40,
+        zIndex: 50,
         display: 'flex',
         flexDirection: 'column',
-        transition: 'width var(--transition-base)',
+        // Desktop: always in-flow (content is pushed by margin). Mobile: slide
+        // the whole drawer off-canvas unless opened via the hamburger.
+        transform: isDesktop ? 'none' : mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
+        transition: 'transform var(--transition-base), width var(--transition-base)',
         overflow: 'hidden',
+        boxShadow: !isDesktop && mobileOpen ? '0 0 40px rgba(0,0,0,0.5)' : 'none',
       }}
     >
       {/* Logo */}
@@ -141,6 +145,23 @@ export default function Sidebar({ collapsed, onToggle }) {
               Admin Panel
             </div>
           </div>
+        )}
+
+        {/* Close button — mobile drawer only */}
+        {!isDesktop && (
+          <button
+            onClick={onCloseMobile}
+            aria-label="Close menu"
+            style={{
+              marginLeft: 'auto', display: 'grid', placeItems: 'center',
+              width: 36, height: 36, borderRadius: 'var(--radius-sm)', flexShrink: 0,
+              background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer',
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
         )}
       </div>
 
@@ -210,6 +231,7 @@ export default function Sidebar({ collapsed, onToggle }) {
                       <NavLink
                         key={child.id}
                         to={child.path}
+                        onClick={onCloseMobile}
                         style={{
                           display: 'block',
                           padding: '7px 12px',
@@ -245,6 +267,7 @@ export default function Sidebar({ collapsed, onToggle }) {
               <NavLink
                 to={item.path}
                 end={item.path === '/'}
+                onClick={onCloseMobile}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -290,14 +313,15 @@ export default function Sidebar({ collapsed, onToggle }) {
         ))}
       </nav>
 
-      {/* Collapse Toggle */}
+      {/* Collapse Toggle — desktop only (mobile uses the close button / overlay) */}
+      {isDesktop && (
       <div style={{
         padding: '12px 8px',
         borderTop: '1px solid var(--border-default)',
         flexShrink: 0,
       }}>
         <button
-          onClick={onToggle}
+          onClick={onToggleCollapse}
           style={{
             width: '100%',
             display: 'flex',
@@ -324,6 +348,7 @@ export default function Sidebar({ collapsed, onToggle }) {
           {!collapsed && <span>Collapse</span>}
         </button>
       </div>
+      )}
     </aside>
   )
 }

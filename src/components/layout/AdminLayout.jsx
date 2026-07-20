@@ -1,35 +1,78 @@
-import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Header from './Header'
+import PageContainer from '../ui/PageContainer'
+import { useIsDesktop } from '../../hooks/useMediaQuery'
 
 export default function AdminLayout() {
-  const [collapsed, setCollapsed] = useState(false)
+  const isDesktop = useIsDesktop() // lg+ → persistent sidebar; below → off-canvas drawer
+  const [collapsed, setCollapsed] = useState(false) // desktop rail collapse
+  const [mobileOpen, setMobileOpen] = useState(false) // mobile drawer
+  const location = useLocation()
+
+  // Close the mobile drawer whenever the route changes.
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [location.pathname])
+
+  // Lock body scroll while the mobile drawer is open.
+  useEffect(() => {
+    if (mobileOpen && !isDesktop) {
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = ''
+      }
+    }
+  }, [mobileOpen, isDesktop])
+
+  // Content is pushed by the sidebar ONLY on desktop; on mobile the drawer floats over.
+  const contentMargin = isDesktop
+    ? collapsed
+      ? 'var(--sidebar-collapsed-width)'
+      : 'var(--sidebar-width)'
+    : '0px'
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
+    <div style={{ minHeight: '100vh' }}>
+      <Sidebar
+        isDesktop={isDesktop}
+        collapsed={isDesktop ? collapsed : false}
+        mobileOpen={mobileOpen}
+        onToggleCollapse={() => setCollapsed((c) => !c)}
+        onCloseMobile={() => setMobileOpen(false)}
+      />
+
+      {/* Dimmed overlay behind the mobile drawer */}
+      {!isDesktop && mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.55)',
+            backdropFilter: 'blur(2px)',
+            zIndex: 45,
+          }}
+        />
+      )}
 
       <div
         style={{
-          flex: 1,
-          marginLeft: collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
+          marginLeft: contentMargin,
           transition: 'margin-left var(--transition-base)',
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
         }}
       >
-        <Header collapsed={collapsed} />
+        <Header showHamburger={!isDesktop} onHamburger={() => setMobileOpen(true)} />
 
-        <main
-          style={{
-            flex: 1,
-            padding: '24px',
-            overflowY: 'auto',
-          }}
-        >
-          <Outlet />
+        <main className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6">
+          <PageContainer>
+            <Outlet />
+          </PageContainer>
         </main>
       </div>
     </div>

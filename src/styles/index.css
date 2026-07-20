@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+/* ─── Tailwind theme bridge (v4) ───
+   Registers the app palette as Tailwind tokens so the reusable primitives can
+   use utilities (bg-surface, text-fg, border-line, bg-primary, text-danger …).
+   These mirror the :root CSS variables below — the SAME palette, exposed to both
+   inline styles (var(--…)) and Tailwind classes. Change a colour here + in
+   :root and it propagates app-wide. Breakpoints use Tailwind defaults
+   (sm 640 / md 768 / lg 1024 / xl 1280 / 2xl 1536). */
+@theme {
+  --color-canvas: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-2: #334155;
+  --color-line: #334155;
+  --color-line-strong: #475569;
+
+  --color-fg: #f1f5f9;
+  --color-fg-muted: #94a3b8;
+  --color-fg-subtle: #64748b;
+
+  --color-primary: #6366f1;
+  --color-primary-light: #818cf8;
+  --color-danger: #ef4444;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+}
+
 /* ─── Design Tokens ─── */
 :root {
   /* Brand palette */

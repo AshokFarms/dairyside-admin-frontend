@@ -123,7 +123,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── Charts + Delivery Summary ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '16px', marginBottom: '24px' }}>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]" style={{ marginBottom: '24px' }}>
         {/* Revenue Chart */}
         <div style={{
           background: 'var(--bg-card)',
@@ -230,7 +230,7 @@ export default function Dashboard() {
       </div>
 
       {/* ── Recent Orders + Low Stock ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '16px' }}>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]">
         {/* Recent Orders */}
         <div style={{
           background: 'var(--bg-card)',
