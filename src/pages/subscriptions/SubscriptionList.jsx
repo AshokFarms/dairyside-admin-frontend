@@ -44,12 +44,31 @@ export default function SubscriptionList() {
     },
     {
       key: 'product_name', header: 'Product',
-      render: (val, row) => (
-        <div>
-          <div style={{ fontWeight: 600, fontSize: '0.8125rem' }}>{val}</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{row.variant_label} × {row.quantity}</div>
-        </div>
-      ),
+      render: (val, row) => {
+        // Compute human-readable volume from packet qty × variant size
+        const qty = Number(row.quantity) || 1;
+        const sl = (row.variant_label || '').toLowerCase().replace(/\s+/g, '');
+        let volLabel = `${qty} × ${row.variant_label || 'unit'}`;
+        if (sl.endsWith('ml')) {
+          const ml = parseFloat(sl) * qty;
+          volLabel = ml >= 1000 ? `${(ml/1000).toFixed(1).replace(/\.0$/,'')} L` : `${ml} ml`;
+        } else if (sl.endsWith('gm') || sl.endsWith('g')) {
+          const gm = parseFloat(sl) * qty;
+          volLabel = gm >= 1000 ? `${(gm/1000).toFixed(1).replace(/\.0$/,'')} kg` : `${gm} g`;
+        } else if (sl.endsWith('kg')) {
+          volLabel = `${(parseFloat(sl)*qty).toFixed(1).replace(/\.0$/,'')} kg`;
+        } else if (sl.endsWith('l')) {
+          volLabel = `${(parseFloat(sl)*qty).toFixed(1).replace(/\.0$/,'')} L`;
+        }
+        return (
+          <div>
+            <div style={{ fontWeight: 600, fontSize: '0.8125rem' }}>{val}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+              {volLabel} / delivery
+            </div>
+          </div>
+        );
+      },
     },
     {
       key: 'frequency', header: 'Frequency',
@@ -60,10 +79,21 @@ export default function SubscriptionList() {
       ),
     },
     {
-      key: 'delivery_slot', header: 'Shift',
+      key: 'delivery_slot', header: 'Delivery Slot',
       render: (val) => {
         const shift = shiftOf(val)
-        return <span style={{ textTransform: 'capitalize' }}>{shift === 'morning' ? '☀' : '🌙'} {shift}</span>
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ textTransform: 'capitalize', fontSize: '0.75rem', fontWeight: 600 }}>
+              {shift === 'morning' ? '☀' : '🌙'} {shift}
+            </span>
+            {val && (
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginTop: '2.5px', whiteSpace: 'nowrap' }}>
+                ⏰ {val}
+              </span>
+            )}
+          </div>
+        )
       },
     },
     {

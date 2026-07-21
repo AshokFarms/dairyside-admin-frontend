@@ -1,7 +1,13 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import AdminLayout from './components/layout/AdminLayout'
 import Login from './pages/auth/Login'
 import { isAuthed } from './auth/session'
+
+// Helper to redirect /products/:id to /products/:id/edit
+function ProductRedirect() {
+  const { id } = useParams()
+  return <Navigate to={`/products/${id}/edit`} replace />
+}
 
 // Gate every admin route behind the static-credentials login. Unauthenticated
 // visits redirect to /login and bounce back to the page they wanted after.
@@ -14,9 +20,12 @@ import Dashboard from './pages/Dashboard'
 import OrderList from './pages/orders/OrderList'
 import OrderDetail from './pages/orders/OrderDetail'
 import ProductList from './pages/products/ProductList'
+import ProductForm from './pages/products/ProductForm'
 import CategoryList from './pages/products/CategoryList'
 import CustomerList from './pages/customers/CustomerList'
+import CustomerDetail from './pages/customers/CustomerDetail'
 import SubscriptionList from './pages/subscriptions/SubscriptionList'
+import SubscriptionDetail from './pages/subscriptions/SubscriptionDetail'
 import DeliveryManifest from './pages/deliveries/DeliveryManifest'
 import CouponList from './pages/coupons/CouponList'
 import AppSettings from './pages/content/AppSettings'
@@ -38,17 +47,18 @@ export default function App() {
 
         {/* Products */}
         <Route path="products" element={<ProductList />} />
-        <Route path="products/new" element={<ComingSoon title="Create Product" description="Product create form is being built" />} />
-        <Route path="products/:id/edit" element={<ComingSoon title="Edit Product" description="Product edit form is being built" />} />
+        <Route path="products/new" element={<ProductForm />} />
+        <Route path="products/:id" element={<ProductRedirect />} />
+        <Route path="products/:id/edit" element={<ProductForm />} />
         <Route path="categories" element={<CategoryList />} />
 
         {/* Customers */}
         <Route path="customers" element={<CustomerList />} />
-        <Route path="customers/:id" element={<ComingSoon title="Customer Detail" description="Customer detail page is being built" />} />
+        <Route path="customers/:id" element={<CustomerDetail />} />
 
         {/* Subscriptions */}
         <Route path="subscriptions" element={<SubscriptionList />} />
-        <Route path="subscriptions/:id" element={<ComingSoon title="Subscription Detail" description="Subscription detail page is being built" />} />
+        <Route path="subscriptions/:id" element={<SubscriptionDetail />} />
         <Route path="trial-packs" element={<ComingSoon title="Trial Packs" description="Trial pack management is being built" />} />
 
         {/* Deliveries */}

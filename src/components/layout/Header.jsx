@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { logout } from '../../auth/session'
 
 export default function Header({ showHamburger, onHamburger }) {
@@ -19,8 +19,15 @@ export default function Header({ showHamburger, onHamburger }) {
 
   return (
     <header
-      className="sticky top-0 z-30 flex items-center justify-between gap-2 px-4 sm:px-6"
       style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 30,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '8px',
+        padding: '0 24px',
         height: 'var(--header-height)',
         background: 'var(--bg-secondary)',
         borderBottom: '1px solid var(--border-default)',
@@ -46,28 +53,51 @@ export default function Header({ showHamburger, onHamburger }) {
         )}
 
         <div className="flex min-w-0 items-center gap-1.5 truncate text-[0.8125rem]">
-          <a href="/" className="hidden shrink-0 sm:inline-flex" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', alignItems: 'center' }}>
+          <Link to="/" className="hidden shrink-0 sm:inline-flex" style={{ color: 'var(--text-tertiary)', textDecoration: 'none', alignItems: 'center', transition: 'color var(--transition-fast)' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-tertiary)'}
+          >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
             </svg>
-          </a>
-          {breadcrumbs.map((crumb, i) => (
-            <span
-              key={i}
-              className={i === breadcrumbs.length - 1 ? 'flex items-center gap-1.5 truncate' : 'hidden items-center gap-1.5 sm:flex'}
-            >
-              <span className="hidden sm:inline" style={{ color: 'var(--text-tertiary)' }}>/</span>
+          </Link>
+          {breadcrumbs.map((crumb, i) => {
+            const isLast = i === breadcrumbs.length - 1
+            return (
               <span
-                className="truncate"
-                style={{
-                  color: i === breadcrumbs.length - 1 ? 'var(--text-primary)' : 'var(--text-tertiary)',
-                  fontWeight: i === breadcrumbs.length - 1 ? 600 : 400,
-                }}
+                key={i}
+                className={isLast ? 'flex items-center gap-1.5 truncate' : 'hidden items-center gap-1.5 sm:flex'}
               >
-                {crumb.label}
+                <span className="hidden sm:inline" style={{ color: 'var(--text-tertiary)' }}>/</span>
+                {isLast ? (
+                  <span
+                    className="truncate"
+                    style={{
+                      color: 'var(--text-primary)',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {crumb.label}
+                  </span>
+                ) : (
+                  <Link
+                    to={crumb.path}
+                    className="truncate"
+                    style={{
+                      color: 'var(--text-tertiary)',
+                      fontWeight: 400,
+                      textDecoration: 'none',
+                      transition: 'color var(--transition-fast)',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-tertiary)'}
+                  >
+                    {crumb.label}
+                  </Link>
+                )}
               </span>
-            </span>
-          ))}
+            )
+          })}
           {breadcrumbs.length === 0 && (
             <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Dashboard</span>
           )}

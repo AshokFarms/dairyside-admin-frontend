@@ -5,7 +5,7 @@ import DataTable from '../../components/common/DataTable'
 import StatusBadge from '../../components/common/StatusBadge'
 import Button from '../../components/common/Button'
 import { ordersApi } from '../../api'
-import { formatCurrency, timeAgo } from '../../utils/formatters'
+import { formatCurrency, formatDateTime } from '../../utils/formatters'
 import { ORDER_STATUS_LABELS } from '../../utils/constants'
 
 const PAGE_SIZE = 25
@@ -83,16 +83,23 @@ export default function OrderList() {
     },
     {
       key: 'delivery_shift',
-      header: 'Shift',
-      render: (val) => (
-        <span style={{
-          fontSize: '0.7rem', fontWeight: 600, padding: '2px 8px', borderRadius: '12px',
-          background: val === 'morning' ? 'rgba(251, 191, 36, 0.1)' : 'rgba(139, 92, 246, 0.1)',
-          color: val === 'morning' ? '#fbbf24' : '#a78bfa',
-          textTransform: 'capitalize',
-        }}>
-          ☀ {val}
-        </span>
+      header: 'Shift / Slot',
+      render: (val, row) => (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{
+            fontSize: '0.7rem', fontWeight: 600, padding: '2px 8px', borderRadius: '12px',
+            background: val === 'morning' ? 'rgba(251, 191, 36, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+            color: val === 'morning' ? '#fbbf24' : '#a78bfa',
+            textTransform: 'capitalize', width: 'fit-content',
+          }}>
+            {val === 'morning' ? '☀' : '🌙'} {val}
+          </span>
+          {row.delivery_slot && (
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginTop: '2.5px', whiteSpace: 'nowrap' }}>
+              {row.delivery_slot}
+            </span>
+          )}
+        </div>
       ),
     },
     {
@@ -103,7 +110,7 @@ export default function OrderList() {
     {
       key: 'created_at',
       header: 'Created',
-      render: (val) => <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>{timeAgo(val)}</span>,
+      render: (val) => <span style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>{formatDateTime(val)}</span>,
     },
   ]
 

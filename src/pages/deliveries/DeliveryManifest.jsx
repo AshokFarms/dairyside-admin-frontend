@@ -94,12 +94,23 @@ export default function DeliveryManifest() {
 
       {/* Shift Tabs */}
       <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', padding: '4px', border: '1px solid var(--border-default)', width: 'fit-content', maxWidth: '100%', overflowX: 'auto' }}>
-        {['all', 'morning', 'evening'].map(tab => (
-          <button key={tab} onClick={() => setShiftFilter(tab)}
-            style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: 'none', fontSize: '0.75rem', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', background: shiftFilter === tab ? 'var(--color-primary)' : 'transparent', color: shiftFilter === tab ? 'white' : 'var(--text-secondary)', textTransform: 'capitalize' }}>
-            {tab === 'morning' ? '☀ Morning' : tab === 'evening' ? '🌙 Evening' : 'All'}
-          </button>
-        ))}
+        {['all', 'morning', 'evening'].map(tab => {
+          let label = 'All';
+          let count = summary.total;
+          if (tab === 'morning') {
+            label = '☀ Morning';
+            count = summary.morning;
+          } else if (tab === 'evening') {
+            label = '🌙 Evening';
+            count = summary.evening;
+          }
+          return (
+            <button key={tab} onClick={() => setShiftFilter(tab)}
+              style={{ padding: '6px 14px', borderRadius: 'var(--radius-sm)', border: 'none', fontSize: '0.75rem', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', background: shiftFilter === tab ? 'var(--color-primary)' : 'transparent', color: shiftFilter === tab ? 'white' : 'var(--text-secondary)', textTransform: 'capitalize' }}>
+              {label} ({count})
+            </button>
+          );
+        })}
       </div>
 
       {/* Delivery List */}
@@ -120,32 +131,56 @@ export default function DeliveryManifest() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map(d => (
-              <tr key={d.id}>
-                <td>
-                  <input type="checkbox" checked={selectedIds.has(d.id)} onChange={() => toggleSelect(d.id)}
-                    style={{ width: 16, height: 16, accentColor: 'var(--color-primary)', cursor: 'pointer' }}
-                    disabled={d.status === 'delivered' || d.status === 'cancelled'}
-                  />
-                </td>
-                <td style={{ fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-primary-light)' }}>{d.order_number}</td>
-                <td style={{ fontWeight: 600 }}>{d.customer}{d.quantity > 1 ? ` × ${d.quantity}` : ''}</td>
-                <td style={{ fontSize: '0.8125rem' }}>{d.items}</td>
-                <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{d.address || '—'}</td>
-                <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{d.pincode || '—'}</td>
-                <td>
-                  <span style={{ textTransform: 'capitalize', fontSize: '0.75rem' }}>
-                    {d.shift === 'morning' ? '☀' : '🌙'} {d.shift}
-                  </span>
-                </td>
-                <td><StatusBadge status={d.status} size="sm" /></td>
-                <td>
-                  {d.status !== 'delivered' && d.status !== 'cancelled' && (
-                    <Button variant="success" size="sm" disabled={busy} onClick={() => completeOne(d.id)}>✓ Complete</Button>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {filtered.map(d => {
+              const isSelectable = d.status !== 'delivered' && d.status !== 'cancelled';
+              const isSelected = selectedIds.has(d.id);
+              return (
+                <tr 
+                  key={d.id}
+                  onClick={(e) => {
+                    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.closest('button')) {
+                      return;
+                    }
+                    if (isSelectable) {
+                      toggleSelect(d.id);
+                    }
+                  }}
+                  style={{ cursor: isSelectable ? 'pointer' : 'default' }}
+                >
+                  <td>
+                    <input type="checkbox" checked={isSelected} onChange={() => toggleSelect(d.id)}
+                      style={{ width: 16, height: 16, accentColor: 'var(--color-primary)', cursor: 'pointer' }}
+                      disabled={!isSelectable}
+                    />
+                  </td>
+                  <td style={{ fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-primary-light)' }}>{d.order_number}</td>
+                  <td style={{ fontWeight: 600 }}>{d.customer}</td>
+                  <td style={{ fontSize: '0.8125rem', fontWeight: d.quantity > 1 ? 600 : 400 }}>
+                    {d.quantity > 1 ? `${d.quantity} × ${d.items}` : d.items}
+                  </td>
+                  <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{d.address || '—'}</td>
+                  <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{d.pincode || '—'}</td>
+                  <td>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ textTransform: 'capitalize', fontSize: '0.75rem', fontWeight: 600 }}>
+                        {d.shift === 'morning' ? '☀' : '🌙'} {d.shift}
+                      </span>
+                      {d.delivery_slot && (
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginTop: '2.5px', whiteSpace: 'nowrap' }}>
+                          ⏰ {d.delivery_slot}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td><StatusBadge status={d.status} size="sm" /></td>
+                  <td>
+                    {isSelectable && (
+                      <Button variant="success" size="sm" disabled={busy} onClick={() => completeOne(d.id)}>✓ Complete</Button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         </TableScroll>

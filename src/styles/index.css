@@ -237,3 +237,39 @@ body {
 .data-table tbody tr:last-child td {
   border-bottom: none;
 }
+
+/* ─── Forms & Inputs ─── */
+.admin-input,
+.admin-select,
+.admin-textarea {
+  width: 100%;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.admin-input:hover,
+.admin-select:hover,
+.admin-textarea:hover {
+  border-color: var(--border-hover);
+}
+
+.admin-input:focus,
+.admin-select:focus,
+.admin-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.admin-input::placeholder,
+.admin-textarea::placeholder {
+  color: var(--text-tertiary);
+  opacity: 0.8;
+}
+

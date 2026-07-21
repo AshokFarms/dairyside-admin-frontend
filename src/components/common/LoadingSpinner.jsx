@@ -1,16 +1,20 @@
-export default function LoadingSpinner({ size = 32, text }) {
+const SIZE_MAP = { sm: 20, md: 28, lg: 40 }
+
+export default function LoadingSpinner({ size = 'md', text }) {
+  const px = typeof size === 'number' ? size : (SIZE_MAP[size] ?? 28)
+
   return (
     <div style={{
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '40px',
-      gap: '16px',
+      padding: '24px',
+      gap: '12px',
     }}>
       <svg
-        width={size}
-        height={size}
+        width={px}
+        height={px}
         viewBox="0 0 24 24"
         fill="none"
         stroke="var(--color-primary)"

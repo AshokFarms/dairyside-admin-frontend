@@ -69,7 +69,13 @@ export default function AdminLayout() {
       >
         <Header showHamburger={!isDesktop} onHamburger={() => setMobileOpen(true)} />
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-6">
+        <main
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '24px',
+          }}
+        >
           <PageContainer>
             <Outlet />
           </PageContainer>

@@ -34,6 +34,12 @@ export default function Button({
       border: '1px solid rgba(16, 185, 129, 0.3)',
       hoverBg: 'rgba(16, 185, 129, 0.2)',
     },
+    warning: {
+      background: 'rgba(245, 158, 11, 0.1)',
+      color: 'var(--color-warning)',
+      border: '1px solid rgba(245, 158, 11, 0.3)',
+      hoverBg: 'rgba(245, 158, 11, 0.2)',
+    },
     ghost: {
       background: 'transparent',
       color: 'var(--text-secondary)',

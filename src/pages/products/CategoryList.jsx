@@ -5,6 +5,7 @@ import PageHeader from '../../components/common/PageHeader'
 import DataTable from '../../components/common/DataTable'
 import Button from '../../components/common/Button'
 import Modal from '../../components/common/Modal'
+import LoadingSpinner from '../../components/common/LoadingSpinner'
 import { toast } from 'react-toastify'
 
 export default function CategoryList() {
@@ -45,7 +46,24 @@ export default function CategoryList() {
     }
   }
 
+  const handleNameChange = (e) => {
+    const name = e.target.value
+    setForm(prev => {
+      const updated = { ...prev, name }
+      if (!editingCategory) {
+        updated.slug = name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '')
+      }
+      return updated
+    })
+  }
+
   const handleSubmit = async () => {
+    if (!form.name.trim()) return toast.error('Category Name is required')
+    if (!form.slug.trim()) return toast.error('Category Slug is required')
+
     try {
       if (editingCategory) {
         await dispatch(updateCategory({ id: editingCategory.id, categoryData: form })).unwrap()
@@ -69,8 +87,12 @@ export default function CategoryList() {
       key: 'name', header: 'Category',
       render: (val, row) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ fontSize: '1.5rem', width: 40, textAlign: 'center' }}>
-            {row.image_url || '📁'}
+          <div style={{
+            width: 40, height: 40, borderRadius: 'var(--radius-sm)',
+            background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '1.2rem', flexShrink: 0, overflow: 'hidden'
+          }}>
+            {row.image_url ? <img src={row.image_url} alt={val} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '📁'}
           </div>
           <div>
             <div style={{ fontWeight: 600 }}>{val}</div>
@@ -113,8 +135,17 @@ export default function CategoryList() {
         </Button>
       </PageHeader>
 
-      {status === 'loading' && <p>Loading categories...</p>}
-      {error && <p style={{ color: 'var(--color-danger)' }}>Error: {error}</p>}
+      {status === 'loading' && (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+          <LoadingSpinner size="md" />
+        </div>
+      )}
+      
+      {error && (
+        <div style={{ padding: '16px', background: 'var(--color-danger-light)', color: 'var(--color-danger)', borderRadius: 'var(--radius-sm)', marginBottom: '20px' }}>
+          Error: {error}
+        </div>
+      )}
       
       {status !== 'loading' && !error && (
         <DataTable columns={columns} data={categories} emptyTitle="No categories found" />
@@ -136,35 +167,54 @@ export default function CategoryList() {
         }
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {['name', 'slug', 'image_url', 'description'].map(field => (
-            <div key={field}>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'capitalize' }}>
-                {field.replace('_', ' ')}
-              </label>
-              {field === 'description' ? (
-                <textarea value={form[field]} onChange={e => setForm({ ...form, [field]: e.target.value })} rows={3}
-                  style={{ width: '100%', background: 'var(--bg-tertiary)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: '10px 12px', color: 'var(--text-primary)', fontSize: '0.8125rem', fontFamily: 'inherit', resize: 'vertical', outline: 'none' }}
-                />
-              ) : (
-                <input type="text" value={form[field]} onChange={e => setForm({ ...form, [field]: e.target.value })}
-                  style={{ width: '100%', background: 'var(--bg-tertiary)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: '10px 12px', color: 'var(--text-primary)', fontSize: '0.8125rem', fontFamily: 'inherit', outline: 'none' }}
-                />
-              )}
-            </div>
-          ))}
-          <div style={{ display: 'flex', gap: '16px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>Category Name *</label>
+            <input type="text" value={form.name} onChange={handleNameChange} placeholder="e.g. Milk & Cream" required
+              className="admin-input"
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>Slug (URL Path) *</label>
+            <input type="text" value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} placeholder="e.g. milk-cream" required
+              className="admin-input"
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: form.image_url ? '1fr auto' : '1fr', gap: '12px', alignItems: 'end' }}>
             <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>Display Order</label>
-              <input type="number" value={form.display_order} onChange={e => setForm({ ...form, display_order: Number(e.target.value) })}
-                style={{ width: '100%', background: 'var(--bg-tertiary)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-sm)', padding: '10px 12px', color: 'var(--text-primary)', fontSize: '0.8125rem', fontFamily: 'inherit', outline: 'none' }}
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>Image URL</label>
+              <input type="text" value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })} placeholder="https://example.com/image.jpg"
+                className="admin-input"
               />
             </div>
-            <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end' }}>
+            {form.image_url && (
+              <div style={{ width: 42, height: 42, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                <img src={form.image_url} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.style.display = 'none' }} />
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>Description</label>
+            <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Brief category description..."
+              className="admin-textarea"
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', alignItems: 'center', marginTop: '4px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>Display Order</label>
+              <input type="number" value={form.display_order} onChange={e => setForm({ ...form, display_order: Number(e.target.value) })}
+                className="admin-input"
+              />
+            </div>
+            <div style={{ height: '100%', display: 'flex', alignItems: 'center', paddingTop: '20px' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
                 <input type="checkbox" checked={form.is_active} onChange={e => setForm({ ...form, is_active: e.target.checked })}
                   style={{ width: 18, height: 18, accentColor: 'var(--color-primary)' }}
                 />
-                Active
+                Active Status
               </label>
             </div>
           </div>

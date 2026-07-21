@@ -306,11 +306,12 @@ export default function OrderDetail() {
               { label: 'Method', value: order.payment_method || '—' },
               { label: 'Type', value: (order.order_type || '').replace(/_/g, ' ') || '—' },
               { label: 'Delivery', value: formatDate(order.delivery_date) },
-              { label: 'Shift', value: order.delivery_shift ? `☀ ${order.delivery_shift}` : '—' },
+              { label: 'Shift', value: order.delivery_shift ? `${order.delivery_shift === 'morning' ? '☀' : '🌙'} ${order.delivery_shift}` : '—' },
+              { label: 'Delivery Slot', value: order.delivery_slot || '—' },
             ].map(({ label, value }, i) => (
               <div key={i} style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '8px 0', borderBottom: i < 4 ? '1px solid var(--border-default)' : 'none',
+                padding: '8px 0', borderBottom: i < 5 ? '1px solid var(--border-default)' : 'none',
                 fontSize: '0.8125rem',
               }}>
                 <span style={{ color: 'var(--text-tertiary)' }}>{label}</span>

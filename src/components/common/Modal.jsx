@@ -26,7 +26,6 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', f
 
   return (
     <div
-      className="p-3 sm:p-6"
       style={{
         position: 'fixed',
         inset: 0,
@@ -37,6 +36,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', f
         background: visible ? 'rgba(0, 0, 0, 0.6)' : 'rgba(0, 0, 0, 0)',
         backdropFilter: visible ? 'blur(4px)' : 'none',
         transition: 'all 200ms ease',
+        padding: '16px',
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
@@ -84,7 +84,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'md', f
         </div>
 
         {/* Body */}
-        <div className="p-4 sm:p-6" style={{ flex: 1, overflowY: 'auto' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
           {children}
         </div>
 
