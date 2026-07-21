@@ -26,12 +26,14 @@ import CustomerList from './pages/customers/CustomerList'
 import CustomerDetail from './pages/customers/CustomerDetail'
 import SubscriptionList from './pages/subscriptions/SubscriptionList'
 import SubscriptionDetail from './pages/subscriptions/SubscriptionDetail'
+import TrialPackList from './pages/subscriptions/TrialPackList'
 import DeliveryManifest from './pages/deliveries/DeliveryManifest'
 import CouponList from './pages/coupons/CouponList'
 import AppSettings from './pages/content/AppSettings'
 import ContactMessages from './pages/messages/ContactMessages'
 import AuditLogs from './pages/audit/AuditLogs'
 import PincodeList from './pages/service-area/PincodeList'
+import DeliverySlotList from './pages/service-area/DeliverySlotList'
 import ComingSoon from './pages/ComingSoon'
 
 export default function App() {
@@ -60,7 +62,7 @@ export default function App() {
         {/* Subscriptions */}
         <Route path="subscriptions" element={<SubscriptionList />} />
         <Route path="subscriptions/:id" element={<SubscriptionDetail />} />
-        <Route path="trial-packs" element={<ComingSoon title="Trial Packs" description="Trial pack management is being built" />} />
+        <Route path="trial-packs" element={<TrialPackList />} />
 
         {/* Deliveries */}
         <Route path="deliveries" element={<DeliveryManifest />} />
@@ -77,7 +79,7 @@ export default function App() {
 
         {/* Service Area */}
         <Route path="pincodes" element={<PincodeList />} />
-        <Route path="delivery-slots" element={<ComingSoon title="Delivery Slots" description="Delivery slot configuration is being built" />} />
+        <Route path="delivery-slots" element={<DeliverySlotList />} />
 
         {/* Messages */}
         <Route path="messages" element={<ContactMessages />} />

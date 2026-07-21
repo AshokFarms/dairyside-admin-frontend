@@ -116,73 +116,73 @@ export default function DeliveryManifest() {
       {/* Delivery List */}
       <div style={{ background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-default)', overflow: 'hidden' }}>
         <TableScroll minWidth={720}>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th style={{ width: '40px' }}></th>
-              <th>Order</th>
-              <th>Customer</th>
-              <th>Items</th>
-              <th>Address</th>
-              <th>Pincode</th>
-              <th>Shift</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(d => {
-              const isSelectable = d.status !== 'delivered' && d.status !== 'cancelled';
-              const isSelected = selectedIds.has(d.id);
-              return (
-                <tr 
-                  key={d.id}
-                  onClick={(e) => {
-                    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.closest('button')) {
-                      return;
-                    }
-                    if (isSelectable) {
-                      toggleSelect(d.id);
-                    }
-                  }}
-                  style={{ cursor: isSelectable ? 'pointer' : 'default' }}
-                >
-                  <td>
-                    <input type="checkbox" checked={isSelected} onChange={() => toggleSelect(d.id)}
-                      style={{ width: 16, height: 16, accentColor: 'var(--color-primary)', cursor: 'pointer' }}
-                      disabled={!isSelectable}
-                    />
-                  </td>
-                  <td style={{ fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-primary-light)' }}>{d.order_number}</td>
-                  <td style={{ fontWeight: 600 }}>{d.customer}</td>
-                  <td style={{ fontSize: '0.8125rem', fontWeight: d.quantity > 1 ? 600 : 400 }}>
-                    {d.quantity > 1 ? `${d.quantity} × ${d.items}` : d.items}
-                  </td>
-                  <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{d.address || '—'}</td>
-                  <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{d.pincode || '—'}</td>
-                  <td>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ textTransform: 'capitalize', fontSize: '0.75rem', fontWeight: 600 }}>
-                        {d.shift === 'morning' ? '☀' : '🌙'} {d.shift}
-                      </span>
-                      {d.delivery_slot && (
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginTop: '2.5px', whiteSpace: 'nowrap' }}>
-                          ⏰ {d.delivery_slot}
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th style={{ width: '40px' }}></th>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Address</th>
+                <th>Pincode</th>
+                <th>Shift</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(d => {
+                const isSelectable = d.status !== 'delivered' && d.status !== 'cancelled';
+                const isSelected = selectedIds.has(d.id);
+                return (
+                  <tr
+                    key={d.id}
+                    onClick={(e) => {
+                      if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.closest('button')) {
+                        return;
+                      }
+                      if (isSelectable) {
+                        toggleSelect(d.id);
+                      }
+                    }}
+                    style={{ cursor: isSelectable ? 'pointer' : 'default' }}
+                  >
+                    <td>
+                      <input type="checkbox" checked={isSelected} onChange={() => toggleSelect(d.id)}
+                        style={{ width: 16, height: 16, accentColor: 'var(--color-primary)', cursor: 'pointer' }}
+                        disabled={!isSelectable}
+                      />
+                    </td>
+                    <td style={{ fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-primary-light)' }}>{d.order_number}</td>
+                    <td style={{ fontWeight: 600 }}>{d.customer}</td>
+                    <td style={{ fontSize: '0.8125rem', fontWeight: d.quantity > 1 ? 600 : 400 }}>
+                      {d.quantity > 1 ? `${d.quantity} × ${d.items}` : d.items}
+                    </td>
+                    <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{d.address || '—'}</td>
+                    <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{d.pincode || '—'}</td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ textTransform: 'capitalize', fontSize: '0.75rem', fontWeight: 600 }}>
+                          {d.shift === 'morning' ? '☀' : '🌙'} {d.shift}
                         </span>
+                        {d.delivery_slot && (
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', marginTop: '2.5px', whiteSpace: 'nowrap' }}>
+                            ⏰ {d.delivery_slot}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td><StatusBadge status={d.status} size="sm" /></td>
+                    <td>
+                      {isSelectable && (
+                        <Button variant="success" size="sm" disabled={busy} onClick={() => completeOne(d.id)}>✓ Complete</Button>
                       )}
-                    </div>
-                  </td>
-                  <td><StatusBadge status={d.status} size="sm" /></td>
-                  <td>
-                    {isSelectable && (
-                      <Button variant="success" size="sm" disabled={busy} onClick={() => completeOne(d.id)}>✓ Complete</Button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </TableScroll>
         {filtered.length === 0 && (
           <EmptyState title="No deliveries" description="Nothing scheduled for this shift today" />

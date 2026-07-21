@@ -51,14 +51,14 @@ export default function SubscriptionList() {
         let volLabel = `${qty} × ${row.variant_label || 'unit'}`;
         if (sl.endsWith('ml')) {
           const ml = parseFloat(sl) * qty;
-          volLabel = ml >= 1000 ? `${(ml/1000).toFixed(1).replace(/\.0$/,'')} L` : `${ml} ml`;
+          volLabel = ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, '')} L` : `${ml} ml`;
         } else if (sl.endsWith('gm') || sl.endsWith('g')) {
           const gm = parseFloat(sl) * qty;
-          volLabel = gm >= 1000 ? `${(gm/1000).toFixed(1).replace(/\.0$/,'')} kg` : `${gm} g`;
+          volLabel = gm >= 1000 ? `${(gm / 1000).toFixed(1).replace(/\.0$/, '')} kg` : `${gm} g`;
         } else if (sl.endsWith('kg')) {
-          volLabel = `${(parseFloat(sl)*qty).toFixed(1).replace(/\.0$/,'')} kg`;
+          volLabel = `${(parseFloat(sl) * qty).toFixed(1).replace(/\.0$/, '')} kg`;
         } else if (sl.endsWith('l')) {
-          volLabel = `${(parseFloat(sl)*qty).toFixed(1).replace(/\.0$/,'')} L`;
+          volLabel = `${(parseFloat(sl) * qty).toFixed(1).replace(/\.0$/, '')} L`;
         }
         return (
           <div>

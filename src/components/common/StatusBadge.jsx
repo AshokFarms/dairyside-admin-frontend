@@ -15,6 +15,8 @@ const statusStyles = {
   failed: { bg: '#fee2e2', text: '#dc2626', dot: '#ef4444' },
   refunded: { bg: '#dbeafe', text: '#2563eb', dot: '#3b82f6' },
   resolved: { bg: '#d1fae5', text: '#059669', dot: '#10b981' },
+  claimed: { bg: '#e0e7ff', text: '#4f46e5', dot: '#6366f1' },
+  scheduled: { bg: '#e0f2fe', text: '#0369a1', dot: '#0ea5e9' },
 }
 
 export default function StatusBadge({ status, size = 'sm' }) {
