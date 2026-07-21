@@ -86,3 +86,17 @@ export const messagesApi = {
   getAll: (params) => apiClient.get('/admin/contact-messages', { params }),
   respond: (id, data) => apiClient.patch(`/admin/contact-messages/${id}`, data),
 }
+
+// Audit trail. Entries are written solely by the customer backend and can never
+// be edited — hence no create/update calls. Deleting is permitted and is itself
+// recorded as an AUDIT_DELETE entry.
+export const auditApi = {
+  getAll: (params) => apiClient.get('/admin/audit-logs', { params }),
+  getFacets: () => apiClient.get('/admin/audit-logs/facets'),
+  getEntityHistory: (type, id, params) =>
+    apiClient.get(`/admin/audit-logs/entity/${type}/${id}`, { params }),
+  remove: (id) => apiClient.delete(`/admin/audit-logs/${id}`),
+  // axios sends a DELETE body only via the `data` option.
+  removeMany: (body) => apiClient.delete('/admin/audit-logs', { data: body }),
+  deletePreview: (body) => apiClient.post('/admin/audit-logs/delete-preview', body),
+}

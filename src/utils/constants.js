@@ -169,6 +169,12 @@ export const NAV_ITEMS = [
     icon: 'messages',
   },
   {
+    id: 'audit-logs',
+    label: 'Audit Logs',
+    path: '/audit-logs',
+    icon: 'audit',
+  },
+  {
     id: 'reports',
     label: 'Reports',
     path: '/reports/revenue',

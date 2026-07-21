@@ -30,6 +30,7 @@ import DeliveryManifest from './pages/deliveries/DeliveryManifest'
 import CouponList from './pages/coupons/CouponList'
 import AppSettings from './pages/content/AppSettings'
 import ContactMessages from './pages/messages/ContactMessages'
+import AuditLogs from './pages/audit/AuditLogs'
 import PincodeList from './pages/service-area/PincodeList'
 import ComingSoon from './pages/ComingSoon'
 
@@ -80,6 +81,9 @@ export default function App() {
 
         {/* Messages */}
         <Route path="messages" element={<ContactMessages />} />
+
+        {/* Audit trail (read-only) */}
+        <Route path="audit-logs" element={<AuditLogs />} />
 
         {/* Reports */}
         <Route path="reports/revenue" element={<ComingSoon title="Revenue Reports" description="Revenue analytics is being built" />} />
