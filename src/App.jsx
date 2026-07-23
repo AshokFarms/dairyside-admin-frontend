@@ -22,6 +22,7 @@ import OrderDetail from './pages/orders/OrderDetail'
 import ProductList from './pages/products/ProductList'
 import ProductForm from './pages/products/ProductForm'
 import CategoryList from './pages/products/CategoryList'
+import Inventory from './pages/products/Inventory'
 import CustomerList from './pages/customers/CustomerList'
 import CustomerDetail from './pages/customers/CustomerDetail'
 import SubscriptionList from './pages/subscriptions/SubscriptionList'
@@ -54,6 +55,7 @@ export default function App() {
         <Route path="products/:id" element={<ProductRedirect />} />
         <Route path="products/:id/edit" element={<ProductForm />} />
         <Route path="categories" element={<CategoryList />} />
+        <Route path="inventory" element={<Inventory />} />
 
         {/* Customers */}
         <Route path="customers" element={<CustomerList />} />

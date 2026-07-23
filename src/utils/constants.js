@@ -111,6 +111,7 @@ export const NAV_ITEMS = [
     children: [
       { id: 'product-list', label: 'All Products', path: '/products' },
       { id: 'categories', label: 'Categories', path: '/categories' },
+      { id: 'inventory', label: 'Inventory', path: '/inventory' },
     ],
   },
   {
