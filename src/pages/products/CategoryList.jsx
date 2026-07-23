@@ -17,10 +17,8 @@ export default function CategoryList() {
   const [form, setForm] = useState({ name: '', slug: '', description: '', display_order: 0, is_active: true, image_url: '' })
 
   useEffect(() => {
-    if (status === 'idle') {
-      dispatch(fetchCategories())
-    }
-  }, [status, dispatch])
+    dispatch(fetchCategories())
+  }, [dispatch])
 
   const handleEdit = (cat) => {
     setEditingCategory(cat)

@@ -13,10 +13,8 @@ export default function ProductList() {
   const { items: products, status, error } = useSelector((state) => state.products)
 
   useEffect(() => {
-    if (status === 'idle') {
-      dispatch(fetchProducts())
-    }
-  }, [status, dispatch])
+    dispatch(fetchProducts())
+  }, [dispatch])
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
