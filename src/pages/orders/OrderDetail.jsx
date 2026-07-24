@@ -10,6 +10,40 @@ import { ordersApi } from '../../api'
 import { formatCurrency, formatDate, formatDateTime } from '../../utils/formatters'
 import { ORDER_STATUS_FLOW, ORDER_STATUS_LABELS } from '../../utils/constants'
 
+function formatVolume(qty, sizeLabel) {
+  const count = Number(qty) || 1;
+  if (!sizeLabel) return `${count}`;
+
+  const sizeMatch = String(sizeLabel).trim().match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)$/);
+  if (sizeMatch) {
+    const sizeVal = parseFloat(sizeMatch[1]);
+    const unit = sizeMatch[2].toLowerCase();
+
+    if (unit === 'ml') {
+      const totalMl = sizeVal * count;
+      if (totalMl >= 1000) {
+        const litres = (totalMl / 1000).toFixed(1).replace(/\.0$/, '');
+        return `${litres}L`;
+      }
+      return `${totalMl}ml`;
+    } else if (unit === 'l' || unit === 'liter' || unit === 'liters') {
+      const totalL = (sizeVal * count).toFixed(1).replace(/\.0$/, '');
+      return `${totalL}L`;
+    } else if (unit === 'gm' || unit === 'g') {
+      const totalGm = sizeVal * count;
+      if (totalGm >= 1000) {
+        const kgs = (totalGm / 1000).toFixed(1).replace(/\.0$/, '');
+        return `${kgs}kg`;
+      }
+      return `${totalGm}g`;
+    } else if (unit === 'kg' || unit === 'kgs') {
+      const totalKg = (sizeVal * count).toFixed(1).replace(/\.0$/, '');
+      return `${totalKg}kg`;
+    }
+  }
+  return `${count}`;
+}
+
 export default function OrderDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -51,7 +85,28 @@ export default function OrderDetail() {
     <div>
       <PageHeader
         title={`Order ${order.order_number}`}
-        subtitle={`Created ${formatDateTime(order.created_at)}`}
+        subtitle={
+          <span>
+            Created {formatDateTime(order.created_at)}
+            {order.subscription_id && (
+              <span
+                onClick={() => navigate(`/subscriptions/${order.subscription_id}`)}
+                style={{
+                  marginLeft: '12px',
+                  color: 'var(--color-primary-light)',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  background: 'rgba(99, 102, 241, 0.12)',
+                  padding: '2px 8px',
+                  borderRadius: '12px',
+                  fontSize: '0.75rem',
+                }}
+              >
+                Linked to Subscription #{order.subscription_id} →
+              </span>
+            )}
+          </span>
+        }
       >
         <Button variant="ghost" size="sm" onClick={() => navigate('/orders')}>← Back to Orders</Button>
       </PageHeader>
@@ -178,7 +233,7 @@ export default function OrderDetail() {
                       <div style={{ fontWeight: 600, fontSize: '0.8125rem' }}>{item.product_name}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{item.variant_label}</div>
                     </td>
-                    <td style={{ textAlign: 'center', fontWeight: 600 }}>{item.quantity}</td>
+                    <td style={{ textAlign: 'center', fontWeight: 600 }}>{formatVolume(item.quantity, item.variant_label)}</td>
                     <td style={{ textAlign: 'right' }}>{formatCurrency(item.unit_price)}</td>
                     <td style={{ textAlign: 'right', fontWeight: 600 }}>{formatCurrency(item.total_price)}</td>
                   </tr>
@@ -305,13 +360,32 @@ export default function OrderDetail() {
               { label: 'Payment', value: <StatusBadge status={order.payment_status || 'pending'} size="sm" /> },
               { label: 'Method', value: order.payment_method || '—' },
               { label: 'Type', value: (order.order_type || '').replace(/_/g, ' ') || '—' },
+              order.subscription_id ? {
+                label: 'Subscription',
+                value: (
+                  <span
+                    onClick={() => navigate(`/subscriptions/${order.subscription_id}`)}
+                    style={{
+                      color: 'var(--color-primary-light)',
+                      cursor: 'pointer',
+                      fontWeight: 700,
+                      textDecoration: 'underline',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    Sub #{order.subscription_id} →
+                  </span>
+                ),
+              } : null,
               { label: 'Delivery', value: formatDate(order.delivery_date) },
               { label: 'Shift', value: order.delivery_shift ? `${order.delivery_shift === 'morning' ? '☀' : '🌙'} ${order.delivery_shift}` : '—' },
               { label: 'Delivery Slot', value: order.delivery_slot || '—' },
-            ].map(({ label, value }, i) => (
+            ].filter(Boolean).map(({ label, value }, i, arr) => (
               <div key={i} style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '8px 0', borderBottom: i < 5 ? '1px solid var(--border-default)' : 'none',
+                padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border-default)' : 'none',
                 fontSize: '0.8125rem',
               }}>
                 <span style={{ color: 'var(--text-tertiary)' }}>{label}</span>

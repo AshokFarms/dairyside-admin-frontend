@@ -8,6 +8,40 @@ import { ordersApi } from '../../api'
 import { formatCurrency, formatDateTime } from '../../utils/formatters'
 import { ORDER_STATUS_LABELS } from '../../utils/constants'
 
+function formatVolume(qty, sizeLabel) {
+  const count = Number(qty) || 1;
+  if (!sizeLabel) return `${count}`;
+
+  const sizeMatch = String(sizeLabel).trim().match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)$/);
+  if (sizeMatch) {
+    const sizeVal = parseFloat(sizeMatch[1]);
+    const unit = sizeMatch[2].toLowerCase();
+
+    if (unit === 'ml') {
+      const totalMl = sizeVal * count;
+      if (totalMl >= 1000) {
+        const litres = (totalMl / 1000).toFixed(1).replace(/\.0$/, '');
+        return `${litres}L`;
+      }
+      return `${totalMl}ml`;
+    } else if (unit === 'l' || unit === 'liter' || unit === 'liters') {
+      const totalL = (sizeVal * count).toFixed(1).replace(/\.0$/, '');
+      return `${totalL}L`;
+    } else if (unit === 'gm' || unit === 'g') {
+      const totalGm = sizeVal * count;
+      if (totalGm >= 1000) {
+        const kgs = (totalGm / 1000).toFixed(1).replace(/\.0$/, '');
+        return `${kgs}kg`;
+      }
+      return `${totalGm}g`;
+    } else if (unit === 'kg' || unit === 'kgs') {
+      const totalKg = (sizeVal * count).toFixed(1).replace(/\.0$/, '');
+      return `${totalKg}kg`;
+    }
+  }
+  return `${count}`;
+}
+
 const PAGE_SIZE = 25
 
 export default function OrderList() {
@@ -59,21 +93,36 @@ export default function OrderList() {
     {
       key: 'order_type',
       header: 'Type',
-      render: (val) => (
-        <span style={{
-          fontSize: '0.7rem', fontWeight: 500, padding: '2px 8px',
-          borderRadius: '12px', background: 'var(--bg-tertiary)', color: 'var(--text-secondary)',
-          textTransform: 'capitalize',
-        }}>
-          {val.replace(/_/g, ' ')}
-        </span>
+      render: (val, row) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <span style={{
+            fontSize: '0.7rem', fontWeight: 500, padding: '2px 8px',
+            borderRadius: '12px', background: 'var(--bg-tertiary)', color: 'var(--text-secondary)',
+            textTransform: 'capitalize', width: 'fit-content',
+          }}>
+            {val.replace(/_/g, ' ')}
+          </span>
+          {row.subscription_id && (
+            <span
+              onClick={(e) => { e.stopPropagation(); navigate(`/subscriptions/${row.subscription_id}`); }}
+              style={{
+                fontSize: '0.7rem',
+                color: 'var(--color-primary-light)',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Sub #{row.subscription_id} →
+            </span>
+          )}
+        </div>
       ),
     },
     {
       key: 'items_count',
       header: 'Items',
       align: 'center',
-      render: (val) => <span style={{ fontWeight: 600 }}>{val}</span>,
+      render: (val, row) => <span style={{ fontWeight: 600 }}>{formatVolume(val, row.size_label)}</span>,
     },
     {
       key: 'total_amount',
