@@ -8,6 +8,63 @@ import TableScroll from '../../components/ui/TableScroll'
 import { deliveriesApi } from '../../api'
 import { formatDate } from '../../utils/formatters'
 
+
+
+function formatTotalVolume(d) {
+  const qty = Number(d.quantity) || 1;
+  const itemsText = d.items || '';
+  
+  let productName = d.product_name || '';
+  let sizeLabel = d.size_label || '';
+  
+  if (!sizeLabel && itemsText) {
+    const match = itemsText.match(/^(.+?)\s+(\d+(?:\.\d+)?\s*(?:ml|l|liter|liters|gm|g|kg|kgs|pcs|packet|packets|unit|units))$/i);
+    if (match) {
+      productName = match[1];
+      sizeLabel = match[2];
+    } else {
+      productName = itemsText;
+    }
+  }
+
+  let totalVolStr = '';
+  const sizeMatch = (sizeLabel || '').match(/^(\d+(?:\.\d+)?)\s*([a-zA-Z]+)$/);
+  if (sizeMatch) {
+    const sizeVal = parseFloat(sizeMatch[1]);
+    const unit = sizeMatch[2].toLowerCase();
+    
+    if (unit === 'ml') {
+      const totalMl = sizeVal * qty;
+      if (totalMl >= 1000) {
+        const litres = (totalMl / 1000).toFixed(1).replace(/\.0$/, '');
+        totalVolStr = litres === '1' ? '1 Liter' : `${litres} Liters`;
+      } else {
+        totalVolStr = `${totalMl} ml`;
+      }
+    } else if (unit === 'l' || unit === 'liter' || unit === 'liters') {
+      const totalL = (sizeVal * qty).toFixed(1).replace(/\.0$/, '');
+      totalVolStr = totalL === '1' ? '1 Liter' : `${totalL} Liters`;
+    } else if (unit === 'gm' || unit === 'g') {
+      const totalGm = sizeVal * qty;
+      if (totalGm >= 1000) {
+        const kgs = (totalGm / 1000).toFixed(1).replace(/\.0$/, '');
+        totalVolStr = `${kgs} kg`;
+      } else {
+        totalVolStr = `${totalGm} g`;
+      }
+    } else if (unit === 'kg' || unit === 'kgs') {
+      const totalKg = (sizeVal * qty).toFixed(1).replace(/\.0$/, '');
+      totalVolStr = `${totalKg} kg`;
+    }
+  }
+
+  if (totalVolStr) {
+    return { vol: totalVolStr, name: productName };
+  }
+
+  return { vol: `${qty} ×`, name: itemsText };
+}
+
 export default function DeliveryManifest() {
   const [shiftFilter, setShiftFilter] = useState('all')
   const [selectedIds, setSelectedIds] = useState(new Set())
@@ -155,8 +212,18 @@ export default function DeliveryManifest() {
                     </td>
                     <td style={{ fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-primary-light)' }}>{d.order_number}</td>
                     <td style={{ fontWeight: 600 }}>{d.customer}</td>
-                    <td style={{ fontSize: '0.8125rem', fontWeight: d.quantity > 1 ? 600 : 400 }}>
-                      {d.quantity > 1 ? `${d.quantity} × ${d.items}` : d.items}
+                    <td style={{ fontSize: '0.8125rem' }}>
+                      {(() => {
+                        const { vol, name } = formatTotalVolume(d);
+                        return (
+                          <span>
+                            <strong style={{ color: 'var(--color-primary-light)', fontWeight: 700 }}>
+                              {vol}
+                            </strong>
+                            {name ? <span style={{ color: 'var(--text-secondary)', marginLeft: '6px' }}>{name}</span> : null}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{d.address || '—'}</td>
                     <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{d.pincode || '—'}</td>

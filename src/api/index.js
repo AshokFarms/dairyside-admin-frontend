@@ -26,6 +26,16 @@ export const productsApi = {
   updateStock: (id, data) => apiClient.patch(`/admin/variants/${id}/stock`, data),
 }
 
+// Inventory — all writes are ledgered on the backend and broadcast to shoppers.
+export const inventoryApi = {
+  variants: (params) => apiClient.get('/admin/inventory/variants', { params }),
+  lowStock: (params) => apiClient.get('/admin/inventory/low-stock', { params }),
+  ledger: (params) => apiClient.get('/admin/inventory/ledger', { params }),
+  restock: (id, data) => apiClient.post(`/admin/inventory/variants/${id}/restock`, data),
+  adjust: (id, data) => apiClient.post(`/admin/inventory/variants/${id}/adjust`, data),
+  setThreshold: (id, data) => apiClient.patch(`/admin/inventory/variants/${id}/threshold`, data),
+}
+
 export const categoriesApi = {
   getAll: (params) => apiClient.get('/admin/categories', { params }),
   create: (data) => apiClient.post('/admin/categories', data),
